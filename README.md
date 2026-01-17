@@ -179,6 +179,12 @@ popup.js/html
 
 ## 📝 Changelog
 
+### [1.0.1] - 2026-01-17
+
+#### Fixed
+- Corregido cálculo de FPS que mostraba el doble en videos de 60fps
+- Ahora usa `presentedFrames` del metadata de RVFC para mayor precisión
+
 ### [1.0.0] - 2026-01-17
 
 #### Added
@@ -192,6 +198,8 @@ popup.js/html
 - Arrastrar y soltar para posicionamiento personalizado
 - Persistencia de configuración con Chrome Storage
 - Arquitectura modular con cleanup adecuado
+
+### [1.0.1] - 2025-01-17
 
 ## 📄 Licencia
 
