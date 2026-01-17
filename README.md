@@ -199,8 +199,6 @@ popup.js/html
 - Persistencia de configuración con Chrome Storage
 - Arquitectura modular con cleanup adecuado
 
-### [1.0.1] - 2025-01-17
-
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
