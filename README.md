@@ -5,6 +5,9 @@
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Chrome](https://img.shields.io/badge/chrome-extension-orange.svg)
+![GitHub stars](https://img.shields.io/github/stars/oscardaaz/video-hud-extension)
+![GitHub issues](https://img.shields.io/github/issues/oscardaaz/video-hud-extension)
+![GitHub last commit](https://img.shields.io/github/last-commit/oscardaaz/video-hud-extension)
 
 **Una extensión de Chrome que muestra información en tiempo real sobre la reproducción de vídeos**
 
@@ -176,7 +179,7 @@ popup.js/html
 
 ## 📝 Changelog
 
-### [1.0.0] - 2025-01-XX
+### [1.0.0] - 2026-01-17
 
 #### Added
 - Detección automática de vídeos
