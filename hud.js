@@ -41,7 +41,7 @@
   async function safeGetCfg() {
     try {
       if (!chrome?.storage?.sync) return { ...DEFAULTS };
-      
+
       return await new Promise((resolve) => {
         chrome.storage.sync.get({ [STORAGE_KEY]: DEFAULTS }, (data) => {
           const stored = data?.[STORAGE_KEY];
@@ -97,11 +97,11 @@
 
     getQuality(video) {
       if (!video) return null;
-      
+
       if (typeof video.getVideoPlaybackQuality === "function") {
         return video.getVideoPlaybackQuality();
       }
-      
+
       return {
         totalVideoFrames: video.webkitDecodedFrameCount ?? null,
         droppedVideoFrames: video.webkitDroppedFrameCount ?? null
@@ -143,8 +143,8 @@
     reset() {
       this.fps = null;
       this.rvfcActive = false;
-      this.rvfcCount = 0;
-      this.rvfcT0 = 0;
+      this.lastPresentedFrames = null;
+      this.lastCheckTime = null;
       this.sampleActive = false;
       this.sampleLastFrames = null;
       this.sampleLastT = 0;
@@ -166,24 +166,32 @@
       if (!video || typeof video.requestVideoFrameCallback !== "function") {
         return false;
       }
-      
+
       if (this.rvfcActive) return true;
 
       this.rvfcActive = true;
-      this.rvfcCount = 0;
-      this.rvfcT0 = performance.now();
+      this.lastPresentedFrames = null;
+      this.lastCheckTime = performance.now();
 
-      const callback = () => {
+      const callback = (now, metadata) => {
         if (!this.rvfcActive) return;
 
-        this.rvfcCount++;
-        const now = performance.now();
-        const dt = (now - this.rvfcT0) / 1000;
+        // Usar presentedFrames del metadata (contador de frames únicos)
+        if (metadata && metadata.presentedFrames != null) {
+          const currentTime = performance.now();
+          const elapsed = (currentTime - this.lastCheckTime) / 1000;
 
-        if (dt >= 1.0) {
-          this.fps = this.rvfcCount / dt;
-          this.rvfcCount = 0;
-          this.rvfcT0 = now;
+          if (this.lastPresentedFrames != null && elapsed >= 1.0) {
+            const framesDiff = metadata.presentedFrames - this.lastPresentedFrames;
+            this.fps = framesDiff / elapsed;
+
+            this.lastPresentedFrames = metadata.presentedFrames;
+            this.lastCheckTime = currentTime;
+          } else if (this.lastPresentedFrames == null) {
+            // Inicializar
+            this.lastPresentedFrames = metadata.presentedFrames;
+            this.lastCheckTime = currentTime;
+          }
         }
 
         try {
@@ -292,7 +300,7 @@
 
       this.root.appendChild(this.handleEl);
       this.root.appendChild(this.contentEl);
-      
+
       document.documentElement.appendChild(this.root);
       this.updateStyles(cfg);
     }
@@ -373,9 +381,9 @@
 
     setContentVisible(visible) {
       if (!this.contentEl) return;
-      
+
       this.contentEl.style.opacity = visible ? "1" : "0";
-      
+
       const cfg = window.__VHUD.cfg;
       this.handleEl.style.display = (cfg.visibilityMode === "hover") ? "block" : "none";
     }
@@ -401,7 +409,7 @@
         const rect = this.root.getBoundingClientRect();
         this.dragging = true;
         this.root.classList.add("vhud-dragging");
-        
+
         this.dragStart = {
           x: e.clientX,
           y: e.clientY,
@@ -442,10 +450,10 @@
 
         this.dragging = false;
         this.root.classList.remove("vhud-dragging");
-        
+
         const cfg = window.__VHUD.cfg;
         this.clampPosition(cfg);
-        
+
         await saveCfg(cfg);
         if (onDragEnd) onDragEnd();
       };
@@ -532,7 +540,7 @@
 
     cleanup() {
       this.removeEventListeners();
-      
+
       if (this.hideTimer) {
         clearTimeout(this.hideTimer);
         this.hideTimer = null;
@@ -576,7 +584,7 @@
       }
 
       this.ui.applyPosition(cfg);
-      
+
       requestAnimationFrame(() => {
         if (cfg.posMode === "xy") {
           this.ui.clampPosition(cfg);
@@ -639,9 +647,9 @@
 
       const render = () => {
         const cfg = window.__VHUD.cfg;
-        
+
         let video = this.videoTracker.currentVideo || this.videoTracker.findVideo();
-        
+
         if (video && video !== this.videoTracker.currentVideo) {
           this.videoTracker.currentVideo = video;
           this.fpsCalc.cleanup();
@@ -676,15 +684,15 @@
         // Generar líneas
         const lines = [];
         lines.push(`REAL:    ${w}×${h}`);
-        
+
         if (cfg.showDisplay) {
           lines.push(`DISPLAY: ${dw}×${dh}`);
         }
-        
+
         if (cfg.showFps) {
           lines.push(`FPS:     ${fps != null ? fps.toFixed(1) : "n/a"}`);
         }
-        
+
         if (cfg.showDropped) {
           if (dropped != null && total != null && total > 0) {
             const pct = ((dropped / total) * 100).toFixed(2);
