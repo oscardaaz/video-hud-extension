@@ -198,7 +198,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 **Óscar Domínguez Alonso**
 
-- GitHub: [@TU_USUARIO](https://github.com/TU_USUARIO)
+- GitHub: [oscardaaz](https://github.com/oscardaaz)
 
 ## 🌟 Agradecimientos
 
